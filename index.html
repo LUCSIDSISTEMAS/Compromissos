@@ -192,26 +192,33 @@
   <div class="header">
     <i class="fa-solid fa-calendar-days"></i> Compromissos
   </div>
+
   <div class="mode-selector">
     <button class="modo" onclick="carregar('dia')">Dia</button>
     <button class="modo" onclick="carregar('semana')">Semana</button>
     <button class="modo" onclick="carregar('mes')">Mês</button>
     <button class="modo" onclick="carregar('ano')">Ano</button>
   </div>
+
   <div class="section-title" id="tituloVisualizacao">Meus compromissos</div>
+
   <div style="text-align: center; margin-top: -10px;">
     <button onclick="lerResumo()" style="border: none; background: none; color: #7F7FD5; font-size: 16px; font-weight: 600; cursor: pointer;">
       🔊 Resumo em voz
     </button>
   </div>
+
   <div id="loading">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><br>
     Carregando compromissos...
   </div>
+
   <div class="agenda-container" id="agenda"></div>
+
   <button class="add-button" onclick="document.getElementById('modal').style.display='block'">
     <i class="fa-solid fa-plus"></i>
   </button>
+
   <div class="modal" id="modal">
     <div class="modal-content">
       <h3>Novo compromisso</h3>
@@ -223,53 +230,48 @@
       <button onclick="document.getElementById('modal').style.display='none'">Cancelar</button>
     </div>
   </div>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxD9LMBBP1axfAz7jSHaUic6c-juUaLuwcPWvZoqnVJn_VwXaLmHVsZoLRefdKx_lkVNg/exec";
 
-function marcarComoRealizado(btn) {
-  const linha = btn.closest("p");
-  const texto = linha.querySelector(".status").innerText;
-  const hora = linha.querySelector("b").innerText.trim();
-  const titulo = texto.split("-")[1]?.trim();
-  const dataBr = linha.closest(".dia")?.querySelector("h3")?.innerText || "";
+    // Marca um compromisso como realizado via botão
+    function marcarComoRealizado(btn) {
+      const linha = btn.closest("p");
+      const texto = linha.querySelector(".status").innerText;
+      const hora = linha.querySelector("b").innerText.trim();
+      const titulo = texto.split("-")[1]?.trim();
+      const dataBr = linha.closest(".dia")?.querySelector("h3")?.innerText.match(/(\d{2}\/\d{2}\/\d{4})/)[0] || "";
 
-  // Corrigir data no formato yyyy-mm-dd (usado no App Script)
-  const partes = dataBr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  const dataFormatada = partes ? `${partes[3]}-${partes[2]}-${partes[1]}` : "";
+      // Formata para yyyy-mm-dd
+      const partes = dataBr.split("/");
+      const dataIso = `${partes[2]}-${partes[1]}-${partes[0]}`;
 
-  // Descobrir o índice do compromisso dentro do mesmo dia
-  const compromissos = linha.closest('.compromissos').querySelectorAll("p");
-  const index = Array.from(compromissos).indexOf(linha);
+      // Descobre índice
+      const compromissos = linha.closest('.compromissos').querySelectorAll("p");
+      const index = Array.from(compromissos).indexOf(linha);
 
-  // Atualiza visual
-  btn.classList.add('checked');
-  btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>Realizado</span>`;
-  btn.disabled = true;
+      // Atualiza visual
+      btn.classList.add('checked');
+      btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>Realizado</span>`;
+      btn.disabled = true;
 
-  // Envia para o Google Apps Script
-  fetch(API_URL, {
-  mode: 'no-cors',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      acao: "realizado",
-      data: dataFormatada,
-      hora: hora,
-      titulo: titulo,
-      index: index,
-      status: "realizado"
-    })
-  })
-  .then(r => r.text())
-  .then(res => {
-    console.log("Resposta do servidor:", res);
-    if (res.includes("erro")) alert("Erro ao atualizar: " + res);
-  })
-  .catch(err => {
-    console.error("Erro:", err);
-    alert("Erro na conexão com o servidor.");
-  });
-}
+      // Envia para o Apps Script
+      fetch(API_URL, {
+        mode: 'no-cors',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          acao: "realizado",
+          data: dataIso,
+          hora: hora,
+          titulo: titulo,
+          index: index,
+          status: "realizado"
+        })
+      });
+    }
+
+    // Função para falar texto
     function falar(texto) {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(texto);
@@ -278,35 +280,96 @@ function marcarComoRealizado(btn) {
         speechSynthesis.speak(utterance);
       }
     }
-function lerResumo() {
-  const compromissos = document.querySelectorAll('.compromissos .status');
-  if (compromissos.length === 0) {
-    falar("Você não tem compromissos para este período.");
-    return;
-  }
 
-  let texto = "Resumo dos seus compromissos: ";
+    // Lê resumo de todos os compromissos exibidos
+    function lerResumo() {
+      const compromissos = document.querySelectorAll('.compromissos .status');
+      if (compromissos.length === 0) {
+        falar("Você não tem compromissos para este período.");
+        return;
+      }
 
-  compromissos.forEach(statusEl => {
-    const horaEl = statusEl.querySelector("b");
-    const hora = horaEl ? horaEl.innerText.trim() : "";
-    const textoCompleto = statusEl.innerText.replace(hora, "").replace("-", "").trim();
-    if (hora && textoCompleto) {
-      texto += `Às ${hora}, seu compromisso é ${textoCompleto}. `;
+      let texto = "Resumo dos seus compromissos: ";
+
+      compromissos.forEach(statusEl => {
+        const horaEl = statusEl.querySelector("b");
+        const hora = horaEl ? horaEl.innerText.trim() : "";
+        const textoCompleto = statusEl.innerText.replace(hora, "").replace("-", "").trim();
+        if (hora && textoCompleto) {
+          texto += `Às ${hora}, seu compromisso é ${textoCompleto}. `;
+        }
+      });
+
+      falar(texto);
     }
-  });
 
-  falar(texto);
-}
+    // Lê compromissos de uma data específica
+    function lerCompromissosEmData(dataBr) {
+      const dias = document.querySelectorAll('.dia');
+      let encontrado = false;
+      dias.forEach(dia => {
+        const header = dia.querySelector('h3').innerText;
+        if (header.includes(dataBr)) {
+          encontrado = true;
+          const statuses = dia.querySelectorAll('.compromissos .status');
+          if (statuses.length === 0) {
+            falar(`Você não tem compromissos em ${dataBr}.`);
+          } else {
+            let texto = `Compromissos em ${dataBr}: `;
+            statuses.forEach(statusEl => {
+              const horaEl = statusEl.querySelector('b');
+              const hora = horaEl ? horaEl.innerText.trim() : '';
+              const textoCompleto = statusEl.innerText.replace(hora, '').replace('-', '').trim();
+              texto += `Às ${hora}, ${textoCompleto}. `;
+            });
+            falar(texto);
+          }
+        }
+      });
+      if (!encontrado) {
+        falar(`Não encontrei compromissos em ${dataBr}.`);
+      }
+    }
+
+    // Agendar compromisso via voz
+    function agendarCompromisso(dataIso, hora, titulo) {
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: dataIso, hora: hora, titulo: titulo, descricao: '', status: 'pendente' })
+      });
+      setTimeout(() => carregar(), 1000);
+      const partes = dataIso.split('-');
+      const dataBr = `${partes[2]}/${partes[1]}/${partes[0]}`;
+      falar(`Agendado para ${dataBr} às ${hora} ${titulo}.`);
+    }
+
+    // Marca tarefa realizada por hora de voz
+    function marcarTarefaRealizadaPorHora(hora) {
+      const hojeBr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      document.querySelectorAll('.dia').forEach(dia => {
+        if (dia.querySelector('h3').innerText.includes(hojeBr)) {
+          dia.querySelectorAll('.compromissos p').forEach(p => {
+            const horaEl = p.querySelector('b');
+            if (horaEl && horaEl.innerText.trim() === hora) {
+              const btn = p.querySelector('button.check-btn');
+              if (btn) btn.click();
+            }
+          });
+        }
+      });
+    }
+
+    // Carrega compromissos conforme filtro
     function carregar(filtro = 'semana') {
       document.getElementById('tituloVisualizacao').innerText = `Meus compromissos de ${filtro}`;
       document.querySelectorAll('.modo').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.innerText.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase() === filtro)
-          btn.classList.add('active');
+        if (btn.innerText.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase() === filtro) btn.classList.add('active');
       });
-      document.getElementById("agenda").style.display = "none";
-      document.getElementById("loading").style.display = "block";
+      document.getElementById('agenda').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
       fetch(API_URL)
         .then(r => r.json())
         .then(dados => {
@@ -344,9 +407,7 @@ function lerResumo() {
                 if (!isNaN(h)) hora = h.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
               }
               const status = (c.status || '').toLowerCase();
-              const statusIcon = status === 'realizado'
-                ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>'
-                : '<i class="fa-regular fa-clock"></i>';
+              const statusIcon = status === 'realizado' ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>' : '<i class="fa-regular fa-clock"></i>';
               const btn = status === 'realizado'
                 ? `<span style="color:green; font-weight:600;">Realizado</span>`
                 : `<button class="check-btn" onclick="marcarComoRealizado(this)"><i class="fa-regular fa-circle"></i> <span>Realizar</span></button>`;
@@ -357,10 +418,12 @@ function lerResumo() {
             diaDiv.innerHTML = `<h3>${dataFormatada}</h3><div class='compromissos'>${compromissosHtml}</div>`;
             container.appendChild(diaDiv);
           }
-          document.getElementById("loading").style.display = "none";
-          container.style.display = "block";
+          document.getElementById('loading').style.display = 'none';
+          container.style.display = 'block';
         });
     }
+
+    // Salva compromisso via modal
     function salvarCompromisso() {
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
@@ -375,45 +438,63 @@ function lerResumo() {
       document.getElementById('modal').style.display = 'none';
       setTimeout(() => carregar(), 1000);
     }
+
     window.onload = () => carregar();
   </script>
-<!-- Botão para ativar comando por voz -->
-<div style="text-align: center; margin-top: 5px;">
-  <button onclick="ativarMicrofone()" style="border:none; background:none; font-size: 20px; color: #555; cursor: pointer;">
-    🎙️ Falar com Aura
-  </button>
-</div>
 
-<script>
-  // Ativação da API de reconhecimento de voz
-  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  <!-- Botão para ativar comando por voz -->
+  <div style="text-align: center; margin-top: 5px;">
+    <button onclick="ativarMicrofone()" style="border:none; background:none; font-size: 20px; color: #555; cursor: pointer;">
+      🎙️ Falar com Aura
+    </button>
+  </div>
 
-  const reconhecimento = new SpeechRecognition();
-  reconhecimento.lang = 'pt-BR';
-  reconhecimento.continuous = false;
-  reconhecimento.interimResults = false;
+  <script>
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const reconhecimento = new SpeechRecognition();
+    reconhecimento.lang = 'pt-BR';
+    reconhecimento.continuous = false;
+    reconhecimento.interimResults = false;
 
-  reconhecimento.onresult = function(event) {
-    const fala = event.results[0][0].transcript.toLowerCase();
-    console.log("Você disse:", fala);
+    reconhecimento.onresult = function(event) {
+      const fala = event.results[0][0].transcript.toLowerCase();
+      console.log("Você disse:", fala);
 
-    if (fala.includes("compromissos") && fala.includes("hoje")) {
-      lerResumo();
-    } else {
-      falar("Desculpe, não entendi o comando.");
+      if (fala.includes("compromissos") && fala.includes("hoje")) {
+        lerResumo();
+      } else if (fala.includes("compromissos em")) {
+        const match = fala.match(/compromissos em (\d{1,2}\/\d{1,2}\/\d{4})/);
+        if (match) {
+          lerCompromissosEmData(match[1]);
+        } else {
+          falar("Não entendi a data. Por favor, diga no formato dd/mm/aaaa.");
+        }
+      } else if (fala.match(/agende para (\d{2}\/\d{2}\/\d{4}) (?:às |as )?(\d{2}:\d{2}) (.+)/)) {
+        const partes = fala.match(/agende para (\d{2}\/\d{2}\/\d{4}) (?:às |as )?(\d{2}:\d{2}) (.+)/);
+        const dataBr = partes[1];
+        const hora = partes[2];
+        const titulo = partes[3];
+        const dt = dataBr.split('/');
+        const dataIso = `${dt[2]}-${dt[1]}-${dt[0]}`;
+        agendarCompromisso(dataIso, hora, titulo);
+      } else if (fala.match(/tarefa das (\d{2}:\d{2}) (?:de )?hoje foi realizada/)) {
+        const hora = fala.match(/tarefa das (\d{2}:\d{2}) (?:de )?hoje foi realizada/)[1];
+        marcarTarefaRealizadaPorHora(hora);
+      } else {
+        falar("Desculpe, não entendi o comando.");
+      }
+    };
+
+    reconhecimento.onerror = function(event) {
+      console.error("Erro no reconhecimento de voz:", event.error);
+      falar("Houve um problema ao escutar sua voz.");
+    };
+
+    function ativarMicrofone() {
+      reconhecimento.start();
+      falar("Estou ouvindo...");
     }
-  };
+  </script>
 
-  reconhecimento.onerror = function(event) {
-    console.error("Erro no reconhecimento de voz:", event.error);
-    falar("Houve um problema ao escutar sua voz.");
-  };
-
-  function ativarMicrofone() {
-    reconhecimento.start();
-    falar("Estou ouvindo...");
-  }
-</script>
-  
 </body>
 </html>
