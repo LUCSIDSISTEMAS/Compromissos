@@ -4,136 +4,185 @@
   <meta charset="UTF-8">
   <title>Agenda - Compromissos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f7f7f7;
+      font-family: 'Inter', sans-serif;
+      background: #F1F3F6;
+      color: #333;
     }
     .header {
-      background-color: #4CAF50;
+      background: linear-gradient(to right, #7F7FD5, #86A8E7);
       color: white;
-      padding: 20px;
+      padding: 25px 15px;
       text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-      border-radius: 0 0 20px 20px;
+      font-size: 26px;
+      font-weight: 700;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
     }
-    .header i { margin-right: 10px; }
     .mode-selector {
       display: flex;
       justify-content: center;
-      margin-top: 15px;
+      margin: 20px 0;
       gap: 10px;
     }
     .mode-selector button {
       border: none;
       border-radius: 20px;
-      padding: 10px 20px;
-      background: #ccc;
+      padding: 10px 18px;
+      background: #E4E8F0;
       color: #333;
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.3s, color 0.3s;
     }
     .mode-selector .active {
-      background-color: #b04c7d;
+      background: linear-gradient(to right, #7F7FD5, #86A8E7);
       color: white;
     }
     .section-title {
       text-align: center;
-      margin: 20px 0 10px;
-      color: #888;
-      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 18px;
+      color: #666;
+      font-weight: 600;
     }
     .agenda-container {
-      max-width: 500px;
-      margin: 0 auto;
+      max-width: 600px;
+      margin: 0 auto 60px;
       background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      padding: 20px 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
-    .dia { margin-bottom: 20px; }
+    .dia {
+      margin-bottom: 30px;
+      animation: fadeSlideUp 0.4s ease forwards;
+      opacity: 0;
+    }
     .dia h3 {
-      margin: 0 0 10px;
-      color: #666;
+      margin: 0 0 12px;
+      color: #444;
       font-size: 18px;
+      border-left: 4px solid #7F7FD5;
+      padding-left: 10px;
     }
     .compromissos {
-      border: 1px solid #bbb;
-      border-radius: 10px;
-      padding: 10px 15px;
-      background-color: #fdfdfd;
+      border-radius: 12px;
+      background-color: #fdfdff;
+      padding: 15px 20px;
+      border: 1px solid #dde4ef;
     }
     .compromissos p {
-      margin: 5px 0;
+      margin: 10px 0;
       font-size: 15px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .compromissos p .status {
+    .status {
       display: flex;
       align-items: center;
       gap: 10px;
+      font-weight: 500;
     }
     .add-button {
       position: fixed;
       bottom: 25px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: #4CAF50;
+      background: linear-gradient(135deg, #7F7FD5, #86A8E7);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
+      width: 58px;
+      height: 58px;
       font-size: 26px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       cursor: pointer;
+      transition: transform 0.2s;
     }
-    .add-button:hover { background-color: #45a049; }
+    .add-button:hover {
+      transform: translateX(-50%) scale(1.05);
+    }
     .modal {
       display: none;
       position: fixed;
       z-index: 999;
-      left: 0;
-      top: 0;
+      left: 0; top: 0;
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,0.4);
+      backdrop-filter: blur(3px);
     }
     .modal-content {
       background-color: white;
       margin: 10% auto;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 25px;
+      border-radius: 12px;
       max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .modal-content input, .modal-content textarea {
       width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 5px;
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      font-family: inherit;
     }
-    .realizado-btn {
-      background: none;
+    .modal-content button {
+      margin-right: 10px;
+      padding: 10px 18px;
       border: none;
-      color: green;
+      border-radius: 8px;
+      background: linear-gradient(to right, #7F7FD5, #86A8E7);
+      color: white;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 16px;
+    }
+    .check-btn {
+      background: #e4e8f0;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .check-btn:hover { background: #d1d8e5; }
+    .check-btn.checked {
+      background: #c8f7dc;
+      color: #2e7d32;
+    }
+    .check-btn.checked i {
+      animation: checkpop 0.3s ease;
+    }
+    @keyframes checkpop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fadeSlideUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
     #loading {
       display: none;
       text-align: center;
-      padding: 30px;
+      padding: 40px;
       font-size: 18px;
       color: #888;
     }
@@ -150,16 +199,19 @@
     <button class="modo" onclick="carregar('ano')">Ano</button>
   </div>
   <div class="section-title" id="tituloVisualizacao">Meus compromissos</div>
+  <div style="text-align: center; margin-top: -10px;">
+    <button onclick="lerResumo()" style="border: none; background: none; color: #7F7FD5; font-size: 16px; font-weight: 600; cursor: pointer;">
+      🔊 Resumo em voz
+    </button>
+  </div>
   <div id="loading">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><br>
     Carregando compromissos...
   </div>
   <div class="agenda-container" id="agenda"></div>
-
   <button class="add-button" onclick="document.getElementById('modal').style.display='block'">
     <i class="fa-solid fa-plus"></i>
   </button>
-
   <div class="modal" id="modal">
     <div class="modal-content">
       <h3>Novo compromisso</h3>
@@ -171,10 +223,81 @@
       <button onclick="document.getElementById('modal').style.display='none'">Cancelar</button>
     </div>
   </div>
-
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxD9LMBBP1axfAz7jSHaUic6c-juUaLuwcPWvZoqnVJn_VwXaLmHVsZoLRefdKx_lkVNg/exec";
 
+function marcarComoRealizado(btn) {
+  const linha = btn.closest("p");
+  const texto = linha.querySelector(".status").innerText;
+  const hora = linha.querySelector("b").innerText.trim();
+  const titulo = texto.split("-")[1]?.trim();
+  const dataBr = linha.closest(".dia")?.querySelector("h3")?.innerText || "";
+
+  // Corrigir data no formato yyyy-mm-dd (usado no App Script)
+  const partes = dataBr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  const dataFormatada = partes ? `${partes[3]}-${partes[2]}-${partes[1]}` : "";
+
+  // Descobrir o índice do compromisso dentro do mesmo dia
+  const compromissos = linha.closest('.compromissos').querySelectorAll("p");
+  const index = Array.from(compromissos).indexOf(linha);
+
+  // Atualiza visual
+  btn.classList.add('checked');
+  btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>Realizado</span>`;
+  btn.disabled = true;
+
+  // Envia para o Google Apps Script
+  fetch(API_URL, {
+  mode: 'no-cors',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      acao: "realizado",
+      data: dataFormatada,
+      hora: hora,
+      titulo: titulo,
+      index: index,
+      status: "realizado"
+    })
+  })
+  .then(r => r.text())
+  .then(res => {
+    console.log("Resposta do servidor:", res);
+    if (res.includes("erro")) alert("Erro ao atualizar: " + res);
+  })
+  .catch(err => {
+    console.error("Erro:", err);
+    alert("Erro na conexão com o servidor.");
+  });
+}
+    function falar(texto) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1;
+        speechSynthesis.speak(utterance);
+      }
+    }
+function lerResumo() {
+  const compromissos = document.querySelectorAll('.compromissos .status');
+  if (compromissos.length === 0) {
+    falar("Você não tem compromissos para este período.");
+    return;
+  }
+
+  let texto = "Resumo dos seus compromissos: ";
+
+  compromissos.forEach(statusEl => {
+    const horaEl = statusEl.querySelector("b");
+    const hora = horaEl ? horaEl.innerText.trim() : "";
+    const textoCompleto = statusEl.innerText.replace(hora, "").replace("-", "").trim();
+    if (hora && textoCompleto) {
+      texto += `Às ${hora}, seu compromisso é ${textoCompleto}. `;
+    }
+  });
+
+  falar(texto);
+}
     function carregar(filtro = 'semana') {
       document.getElementById('tituloVisualizacao').innerText = `Meus compromissos de ${filtro}`;
       document.querySelectorAll('.modo').forEach(btn => {
@@ -182,10 +305,8 @@
         if (btn.innerText.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase() === filtro)
           btn.classList.add('active');
       });
-
       document.getElementById("agenda").style.display = "none";
       document.getElementById("loading").style.display = "block";
-
       fetch(API_URL)
         .then(r => r.json())
         .then(dados => {
@@ -198,148 +319,101 @@
           fimSemana.setDate(inicioSemana.getDate() + 6);
           const mesAtual = hoje.getMonth();
           const anoAtual = hoje.getFullYear();
-
           const agrupados = {};
-
           dados.forEach(item => {
             const partes = item.data.split("T")[0].split("-");
             const dataKey = partes.join("-");
             const dataObj = new Date(dataKey + "T00:00:00");
-
             let incluir = false;
-            if (filtro === 'dia') {
-              incluir = dataObj.toDateString() === hoje.toDateString();
-            } else if (filtro === 'semana') {
-              incluir = dataObj >= inicioSemana && dataObj <= fimSemana;
-            } else if (filtro === 'mes') {
-              incluir = dataObj.getMonth() === mesAtual && dataObj.getFullYear() === anoAtual;
-            } else if (filtro === 'ano') {
-              incluir = dataObj.getFullYear() === anoAtual;
-            }
-
+            if (filtro === 'dia') incluir = dataObj.toDateString() === hoje.toDateString();
+            else if (filtro === 'semana') incluir = dataObj >= inicioSemana && dataObj <= fimSemana;
+            else if (filtro === 'mes') incluir = dataObj.getMonth() === mesAtual && dataObj.getFullYear() === anoAtual;
+            else if (filtro === 'ano') incluir = dataObj.getFullYear() === anoAtual;
             if (incluir) {
               if (!agrupados[dataKey]) agrupados[dataKey] = [];
               agrupados[dataKey].push(item);
             }
           });
-
-          if (filtro === 'ano') {
-            const mesesAgrupados = {};
-            Object.keys(agrupados).forEach(data => {
-              const dataObj = new Date(data + "T00:00:00");
-              const mes = dataObj.toLocaleDateString('pt-BR', { month: 'long' });
-              if (!mesesAgrupados[mes]) mesesAgrupados[mes] = [];
-              mesesAgrupados[mes] = mesesAgrupados[mes].concat(agrupados[data]);
-            });
-
-            for (const mes in mesesAgrupados) {
-              const compromissosHtml = mesesAgrupados[mes].map(c => {
-                const dataObj = new Date(c.data);
-                const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-                let hora = c.hora;
-                if (typeof c.hora === 'string' && c.hora.includes('T')) {
-                  const h = new Date(c.hora);
-                  if (!isNaN(h)) {
-                    hora = h.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                  }
-                }
-
-                const statusIcon = c.status === 'realizado'
-                  ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>'
-                  : '<i class="fa-regular fa-clock"></i>';
-
-                return `<p><span class='status'>${statusIcon} <b>${hora}</b> - ${c.titulo}</span> (${dataFormatada})</p>`;
-              }).join('');
-
-              const mesDiv = document.createElement('div');
-              mesDiv.className = 'dia';
-              mesDiv.innerHTML = `<h3>${mes}</h3><div class='compromissos'>${compromissosHtml}</div>`;
-              container.appendChild(mesDiv);
-            }
-
-          } else if (filtro === 'mes') {
-            const semanasAgrupadas = {};
-            Object.keys(agrupados).forEach(data => {
-              const dataObj = new Date(data + "T00:00:00");
-              const diaDoMes = dataObj.getDate();
-              const semana = Math.ceil(diaDoMes / 7);
-              const key = `Semana ${semana}`;
-              if (!semanasAgrupadas[key]) semanasAgrupadas[key] = [];
-              semanasAgrupadas[key] = semanasAgrupadas[key].concat(agrupados[data]);
-            });
-
-            for (const semana in semanasAgrupadas) {
-              const compromissosHtml = semanasAgrupadas[semana].map(c => {
-                let hora = c.hora;
-                if (typeof c.hora === 'string' && c.hora.includes('T')) {
-                  const h = new Date(c.hora);
-                  if (!isNaN(h)) hora = h.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                }
-                const statusIcon = c.status === 'realizado'
-                  ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>'
-                  : '<i class="fa-regular fa-clock"></i>';
-                const btn = c.status === 'realizado' ? '' : `<button class='realizado-btn'>Realizado</button>`;
-                return `<p><span class='status'>${statusIcon} <b>${hora}</b> - ${c.titulo}</span> ${btn}</p>`;
-              }).join('');
-
-              const semanaDiv = document.createElement('div');
-              semanaDiv.className = 'dia';
-              semanaDiv.innerHTML = `<h3>${semana}</h3><div class='compromissos'>${compromissosHtml}</div>`;
-              container.appendChild(semanaDiv);
-            }
-
-          } else {
-            for (const data in agrupados) {
-              const dataObj = new Date(data + "T00:00:00");
-              const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-                weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
-              });
-
-              const compromissosHtml = agrupados[data].map((c, i) => {
-                let hora = c.hora;
-                if (typeof c.hora === 'string' && c.hora.includes('T')) {
-                  const h = new Date(c.hora);
-                  if (!isNaN(h)) hora = h.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                }
-                const statusIcon = c.status === 'realizado'
-                  ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>'
-                  : '<i class="fa-regular fa-clock"></i>';
-                const btn = c.status === 'realizado' ? '' :
-                  `<button class='realizado-btn'>Realizado</button>`;
-                return `<p><span class='status'>${statusIcon} <b>${hora}</b> - ${c.titulo}</span> ${btn}</p>`;
-              }).join('');
-
-              const diaDiv = document.createElement('div');
-              diaDiv.className = 'dia';
-              diaDiv.innerHTML = `<h3>${dataFormatada}</h3><div class='compromissos'>${compromissosHtml}</div>`;
-              container.appendChild(diaDiv);
-            }
+          for (const data in agrupados) {
+            const dataObj = new Date(data + "T00:00:00");
+            const dataFormatada = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+            const compromissosHtml = agrupados[data].map(c => {
+              let hora = c.hora;
+              if (typeof hora === 'string' && hora.includes('T')) {
+                const h = new Date(hora);
+                if (!isNaN(h)) hora = h.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+              }
+              const status = (c.status || '').toLowerCase();
+              const statusIcon = status === 'realizado'
+                ? '<i class="fa-solid fa-circle-check" style="color:green;"></i>'
+                : '<i class="fa-regular fa-clock"></i>';
+              const btn = status === 'realizado'
+                ? `<span style="color:green; font-weight:600;">Realizado</span>`
+                : `<button class="check-btn" onclick="marcarComoRealizado(this)"><i class="fa-regular fa-circle"></i> <span>Realizar</span></button>`;
+              return `<p><span class='status'>${statusIcon} <b>${hora}</b> - ${c.titulo}</span> ${btn}</p>`;
+            }).join('');
+            const diaDiv = document.createElement('div');
+            diaDiv.className = 'dia';
+            diaDiv.innerHTML = `<h3>${dataFormatada}</h3><div class='compromissos'>${compromissosHtml}</div>`;
+            container.appendChild(diaDiv);
           }
-
           document.getElementById("loading").style.display = "none";
           container.style.display = "block";
         });
     }
-
     function salvarCompromisso() {
       const data = document.getElementById('data').value;
       const hora = document.getElementById('hora').value;
       const titulo = document.getElementById('titulo').value;
       const descricao = document.getElementById('descricao').value;
-
       fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data, hora, titulo, descricao, status: 'pendente' })
       });
-
       document.getElementById('modal').style.display = 'none';
       setTimeout(() => carregar(), 1000);
     }
-
     window.onload = () => carregar();
   </script>
+<!-- Botão para ativar comando por voz -->
+<div style="text-align: center; margin-top: 5px;">
+  <button onclick="ativarMicrofone()" style="border:none; background:none; font-size: 20px; color: #555; cursor: pointer;">
+    🎙️ Falar com Aura
+  </button>
+</div>
+
+<script>
+  // Ativação da API de reconhecimento de voz
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const reconhecimento = new SpeechRecognition();
+  reconhecimento.lang = 'pt-BR';
+  reconhecimento.continuous = false;
+  reconhecimento.interimResults = false;
+
+  reconhecimento.onresult = function(event) {
+    const fala = event.results[0][0].transcript.toLowerCase();
+    console.log("Você disse:", fala);
+
+    if (fala.includes("compromissos") && fala.includes("hoje")) {
+      lerResumo();
+    } else {
+      falar("Desculpe, não entendi o comando.");
+    }
+  };
+
+  reconhecimento.onerror = function(event) {
+    console.error("Erro no reconhecimento de voz:", event.error);
+    falar("Houve um problema ao escutar sua voz.");
+  };
+
+  function ativarMicrofone() {
+    reconhecimento.start();
+    falar("Estou ouvindo...");
+  }
+</script>
+  
 </body>
 </html>
